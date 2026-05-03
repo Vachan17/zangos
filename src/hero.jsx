@@ -3,6 +3,9 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useGLTF, Environment, ContactShadows, useProgress } from "@react-three/drei";
 import * as THREE from "three";
 
+/** Paths from `public/` — must honor Vite base (e.g. /zangos/ on GitHub Pages). */
+const pub = (name) => `${import.meta.env.BASE_URL}${name.replace(/^\//, "")}`;
+
 function lerp(a,b,t){return a+(b-a)*Math.max(0,Math.min(1,t));}
 function easeOut(t){return 1-Math.pow(1-Math.max(0,Math.min(1,t)),3);}
 function easeInOut(t){t=Math.max(0,Math.min(1,t));return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;}
@@ -13,7 +16,7 @@ function LoaderScreen({onReady}){
   useEffect(()=>{const t=setTimeout(()=>onReady(),15000);return()=>clearTimeout(t);},[]);
   return(
     <div style={{position:"absolute",inset:0,zIndex:20,background:"#000000",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
-      <video src="/zangoslogo.mp4" autoPlay loop muted playsInline style={{width:"400px",maxWidth:"80vw",height:"auto",marginBottom:"2.5rem"}}/>
+      <video src={pub("zangoslogo.mp4")} autoPlay loop muted playsInline style={{width:"400px",maxWidth:"80vw",height:"auto",marginBottom:"2.5rem"}}/>
       <div style={{width:260,height:4,background:"rgba(255,255,255,0.08)",borderRadius:2,overflow:"hidden"}}>
         <div style={{height:"100%",borderRadius:2,background:"linear-gradient(90deg,#D0161B,#F97316)",width:`${progress}%`,transition:"width 0.4s ease"}}/>
       </div>
@@ -64,7 +67,7 @@ function useModel(url, targetSize, removeNodes=[]){
 
 // ── PLATE — slides in from left, sits at y=-2 ─────────────────────────────────
 function Plate({sp}){
-  const {clone,sc}=useModel("/plate.glb",6.5);
+  const {clone,sc}=useModel(pub("plate.glb"),6.5);
   const g=useRef();
   useFrame(()=>{
     if(!g.current)return;
@@ -77,7 +80,7 @@ function Plate({sp}){
 
 // ── CHICKEN — falls from top, lands perfectly on plate ────────────────────────
 function Chicken({sp}){
-  const {clone,sc}=useModel("/chicken.glb",3.6);
+  const {clone,sc}=useModel(pub("chicken.glb"),3.6);
   const g=useRef();
   useFrame(()=>{
     if(!g.current)return;
@@ -91,7 +94,7 @@ function Chicken({sp}){
 
 // ── COLA — very big, enters from bottom-left, lands LEFT of scene ──────
 function Cola({sp}){
-  const {clone,sc}=useModel("/cola.glb", 14.0, ["Cube"]);
+  const {clone,sc}=useModel(pub("cola.glb"), 14.0, ["Cube"]);
   clone.traverse((child) => {
     if (child.name.includes("Plane") || child.name.includes("Circle")) {
       child.visible = true;
@@ -110,7 +113,7 @@ function Cola({sp}){
 
 // ── BURGER — big, RIGHT side, falls from top ──────────────────────────────────
 function Burger({sp}){
-  const {clone,sc}=useModel("/burger.glb", 8.0);
+  const {clone,sc}=useModel(pub("burger.glb"), 8.0);
   const g=useRef();
   useFrame(()=>{
     if(!g.current)return;
@@ -127,7 +130,7 @@ function Burger({sp}){
 
 // ── MAYO — near the chicken/plate ──────────────────────────────────────
 function Mayo({sp}){
-  const {clone,sc}=useModel("/mayo.glb", 1.2);
+  const {clone,sc}=useModel(pub("mayo.glb"), 1.2);
   const g=useRef();
   useFrame(()=>{
     if(!g.current)return;
@@ -288,9 +291,9 @@ export default function Hero3D(){
   );
 }
 
-useGLTF.preload("/plate.glb");
-useGLTF.preload("/chicken.glb");
-useGLTF.preload("/cola.glb");
-useGLTF.preload("/burger.glb");
-useGLTF.preload("/chilli.glb");
-useGLTF.preload("/mayo.glb");
+useGLTF.preload(pub("plate.glb"));
+useGLTF.preload(pub("chicken.glb"));
+useGLTF.preload(pub("cola.glb"));
+useGLTF.preload(pub("burger.glb"));
+useGLTF.preload(pub("chilli.glb"));
+useGLTF.preload(pub("mayo.glb"));

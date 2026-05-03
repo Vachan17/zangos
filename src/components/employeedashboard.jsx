@@ -19,8 +19,6 @@ const PAY_BADGE = {
   failed:      { bg: "rgba(220,38,38,0.07)",   border: "rgba(220,38,38,0.25)",  text: "#DC2626", label: "❌ Failed" },
 };
 
-const SOCKET_URL = "http://localhost:5000";
-
 export default function EmployeeDashboard() {
   const [authenticated, setAuthenticated] = useState(() => sessionStorage.getItem("zangos_admin_auth") === "true");
   const [passwordInput, setPasswordInput] = useState("");
