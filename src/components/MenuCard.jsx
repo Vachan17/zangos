@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { API_BASE } from "../config";
 
 const TAG_COLORS = {
   "Nashville Hot": { bg:"#D0161B",  text:"#fff" },
@@ -35,16 +36,18 @@ const CAT_IMG = {
   "French Fries":  "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=600&q=80",
 };
 
-function MenuCard({ item, onAddToCart }) {
+function MenuCard({ item, onAddToCart, user, onEdit, onDelete }) {
   const [flipped,     setFlipped]     = useState(false);
   const [hovered,     setHovered]     = useState(false);
   const [imgError,    setImgError]    = useState(false);
   const [selectedVar, setSelectedVar] = useState(0);
   const [flash,       setFlash]       = useState(false);
 
-  const imgSrc = imgError
+  const isAdmin = user?.role === "admin" || user?.role === "employee";
+
+  const imgSrc = item.image || (imgError
     ? (CAT_IMG[item.category] || CAT_IMG["Fried Chicken"])
-    : (ITEM_IMAGES[item.name] || CAT_IMG[item.category]);
+    : (ITEM_IMAGES[item.name] || CAT_IMG[item.category]));
 
   const lowestPrice = item.variants?.length
     ? Math.min(...item.variants.map(v => v.price)) : null;
@@ -54,6 +57,15 @@ function MenuCard({ item, onAddToCart }) {
     onAddToCart?.(item, item.variants[selectedVar]);
     setFlash(true);
     setTimeout(() => setFlash(false), 1200);
+  };
+
+  const doDelete = async (e) => {
+    e.stopPropagation();
+    if (!window.confirm(`Delete ${item.name}?`)) return;
+    try {
+      const res = await fetch(`${API_BASE}/api/menu/${item._id}`, { method: "DELETE" });
+      if (res.ok) onDelete?.();
+    } catch (err) { console.error(err); }
   };
 
   return (
@@ -104,6 +116,14 @@ function MenuCard({ item, onAddToCart }) {
                     boxShadow:"0 2px 6px rgba(0,0,0,0.2)",
                   }}>{tag}</span>
                 ))}
+              </div>
+            )}
+
+            {/* Admin Controls */}
+            {isAdmin && !flipped && (
+              <div style={{ position:"absolute", top:10, right:10, display:"flex", gap:"0.4rem" }}>
+                <button onClick={(e) => { e.stopPropagation(); onEdit(); }} style={{ background:"rgba(255,255,255,0.9)", border:"none", borderRadius:"50%", width:28, height:28, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"0.8rem" }}>✎</button>
+                <button onClick={doDelete} style={{ background:"rgba(208,22,27,0.9)", color:"#fff", border:"none", borderRadius:"50%", width:28, height:28, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"0.8rem" }}>✕</button>
               </div>
             )}
 

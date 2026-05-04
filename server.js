@@ -1,5 +1,8 @@
 import express from "express";
 import http from "http";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 import { Server } from "socket.io";
 import mongoose from "mongoose";
 import cors from "cors";
@@ -9,7 +12,9 @@ import orderRoutes   from "./backend/routes/orders.js";
 import authRoutes    from "./backend/routes/auth.js";
 import paymentRoutes from "./backend/routes/payment.js";
 
-dotenv.config({ path: "./backend/.env" });
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+dotenv.config({ path: path.join(__dirname, "backend", ".env") });
 
 const app    = express();
 const server = http.createServer(app);
@@ -17,7 +22,7 @@ const io     = new Server(server, { cors: { origin: "*" } });
 
 app.set("io", io);
 app.use(cors({
-  origin: (origin, cb) => cb(null, true), // allow all origins; restrict to your Vercel URL in production if needed
+  origin: (origin, cb) => cb(null, true),
   credentials: true,
 }));
 app.use((req, res, next) => {
@@ -31,7 +36,21 @@ app.use("/api/orders",  orderRoutes);
 app.use("/api/auth",    authRoutes);
 app.use("/api/payment", paymentRoutes);
 
-app.get("/", (req, res) => res.json({ message: "Zangos API running 🔥" }));
+const distDir = path.join(__dirname, "dist");
+const indexHtml = path.join(distDir, "index.html");
+
+if (fs.existsSync(indexHtml)) {
+  app.use(express.static(distDir));
+  app.use((req, res, next) => {
+    if (req.method !== "GET" && req.method !== "HEAD") return next();
+    if (req.path.startsWith("/api") || req.path.startsWith("/socket.io")) return next();
+    res.sendFile(indexHtml, (err) => (err ? next(err) : undefined));
+  });
+} else {
+  app.get("/", (_req, res) =>
+    res.json({ message: "Zangos API — run npm run build to serve the React app from this host." })
+  );
+}
 
 io.on("connection", (socket) => {
   console.log("🟢 Employee/Client connected:", socket.id);

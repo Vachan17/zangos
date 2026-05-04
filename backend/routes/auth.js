@@ -32,7 +32,7 @@ router.post("/register", async (req, res) => {
     await user.save();
 
     const token = jwt.sign({ id: user._id, email: user.email }, process.env.JWT_SECRET, { expiresIn: "7d" });
-    res.json({ success: true, token, user: { id: user._id, email: user.email, name: user.name } });
+    res.json({ success: true, token, user: { id: user._id, email: user.email, name: user.name, role: user.role } });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -54,7 +54,7 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ error: "Invalid password" });
 
     const token = jwt.sign({ id: user._id, email: user.email }, process.env.JWT_SECRET, { expiresIn: "7d" });
-    res.json({ success: true, token, user: { id: user._id, email: user.email, name: user.name, phone: user.phone } });
+    res.json({ success: true, token, user: { id: user._id, email: user.email, name: user.name, phone: user.phone, role: user.role } });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

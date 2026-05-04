@@ -45,6 +45,28 @@ function CustomerApp({ initialUser }) {
   const [historyOpen,    setHistoryOpen]    = useState(false);
   const [authOpen,       setAuthOpen]       = useState(false);
   const [user,           setUser]           = useState(initialUser || null);
+  const [menuItems,      setMenuItems]      = useState([]);
+  const [loadingMenu,    setLoadingMenu]    = useState(true);
+
+  useEffect(() => {
+    fetch(`${API_BASE}/api/menu`)
+      .then(res => res.json())
+      .then(data => {
+        setMenuItems(data.length > 0 ? data : MENU_DATA);
+        setLoadingMenu(false);
+      })
+      .catch(() => {
+        setMenuItems(MENU_DATA);
+        setLoadingMenu(false);
+      });
+  }, []);
+
+  const refreshMenu = () => {
+    setLoadingMenu(true);
+    fetch(`${API_BASE}/api/menu`)
+      .then(res => res.json())
+      .then(data => { setMenuItems(data); setLoadingMenu(false); });
+  };
 
   const logout = () => {
     localStorage.removeItem("zangos_token");
@@ -56,7 +78,7 @@ function CustomerApp({ initialUser }) {
   const [toast, setToast] = useState(null);
 
   useEffect(() => {
-    const socket = io(SOCKET_URL, { transports: ["websocket"] });
+    const socket = io(SOCKET_URL ?? undefined, { transports: ["websocket"] });
     socket.on("order_updated", ({ orderId, orderNumber, status }) => {
       setOrderHistory(prev => {
         const idx = prev.findIndex(o => (o._id === orderId) || (o.orderId === orderId));
@@ -84,8 +106,8 @@ function CustomerApp({ initialUser }) {
   }, []);
 
   const filtered = activeCategory === "All"
-    ? MENU_DATA
-    : MENU_DATA.filter(i => i.category === activeCategory);
+    ? menuItems
+    : menuItems.filter(i => i.category === activeCategory);
 
   const cartCount = cart.reduce((s, i) => s + i.qty, 0);
 
@@ -132,7 +154,8 @@ function CustomerApp({ initialUser }) {
         items={filtered} categories={CATEGORIES}
         activeCategory={activeCategory}
         onCategoryChange={setActiveCategory}
-        loading={false} onAddToCart={addToCart}
+        loading={loadingMenu} onAddToCart={addToCart}
+        user={user} onMenuUpdate={refreshMenu}
       />
       <About />
       <Locations onOrderNow={() => document.getElementById("menu")?.scrollIntoView({ behavior:"smooth" })} />

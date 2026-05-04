@@ -1,6 +1,13 @@
+import { useState } from "react";
 import MenuCard from "./MenuCard";
+import MenuEditModal from "./MenuEditModal";
 
-export default function MenuSection({ items, categories, activeCategory, onCategoryChange, loading, onAddToCart }) {
+export default function MenuSection({ items, categories, activeCategory, onCategoryChange, loading, onAddToCart, user, onMenuUpdate }) {
+  const [editingItem, setEditingItem] = useState(null);
+  const [showAddModal, setShowAddModal] = useState(false);
+  
+  const isAdmin = user?.role === "admin" || user?.role === "employee";
+
   return (
     <section id="menu" style={{
       padding: "6rem 2rem",
@@ -24,6 +31,23 @@ export default function MenuSection({ items, categories, activeCategory, onCateg
           fontSize: "clamp(2.5rem, 6vw, 5rem)",
           letterSpacing: "0.06em", color: "#1c0a00", lineHeight: 1,
         }}>WHAT'S COOKING 🔥</h2>
+
+        {isAdmin && (
+          <button 
+            onClick={() => setShowAddModal(true)}
+            style={{
+              marginTop: "1.5rem", background: "linear-gradient(135deg, #1c0a00, #444)", color: "#fff",
+              border: "none", borderRadius: "0.5rem", padding: "0.7rem 1.5rem",
+              fontFamily: "'Barlow', sans-serif", fontWeight: 800, fontSize: "0.8rem",
+              letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer",
+              boxShadow: "0 8px 25px rgba(0,0,0,0.2)", transition: "transform 0.2s"
+            }}
+            onMouseEnter={e => e.currentTarget.style.transform = "translateY(-3px)"}
+            onMouseLeave={e => e.currentTarget.style.transform = "none"}
+          >
+            + Add New Product
+          </button>
+        )}
       </div>
 
       {/* Category filters */}
@@ -55,8 +79,26 @@ export default function MenuSection({ items, categories, activeCategory, onCateg
           gridTemplateColumns:"repeat(auto-fill, minmax(280px, 1fr))",
           gap:"1.5rem", maxWidth:1200, margin:"0 auto",
         }}>
-          {items.map(item => <MenuCard key={item._id} item={item} onAddToCart={onAddToCart} />)}
+          {items.map(item => (
+            <MenuCard 
+              key={item._id} 
+              item={item} 
+              onAddToCart={onAddToCart} 
+              user={user}
+              onEdit={() => setEditingItem(item)}
+              onDelete={onMenuUpdate}
+            />
+          ))}
         </div>
+      )}
+
+      {/* Modals */}
+      {(editingItem || showAddModal) && (
+        <MenuEditModal 
+          item={editingItem} 
+          onClose={() => { setEditingItem(null); setShowAddModal(false); }}
+          onSave={onMenuUpdate}
+        />
       )}
     </section>
   );

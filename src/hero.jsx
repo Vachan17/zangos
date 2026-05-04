@@ -78,18 +78,47 @@ function Plate({sp}){
   return <group ref={g}><primitive object={clone} scale={sc}/></group>;
 }
 
-// ── CHICKEN — falls from top, lands perfectly on plate ────────────────────────
-function Chicken({sp}){
-  const {clone,sc}=useModel(pub("chicken.glb"),3.6);
-  const g=useRef();
-  useFrame(()=>{
-    if(!g.current)return;
-    const fall=easeOut(Math.min(1, Math.max(0,(sp-0.05)/0.15)));
-    const e=easeInOut(Math.max(0,(sp-0.80)/0.20));
-    g.current.position.set(lerp(0,-20,e), lerp(10,-2.2,fall), 1.3);
+// ── DYNAMIC CHICKEN SEQUENCE — falls first, then swaps models ──────────────────
+function DynamicChicken({sp}){
+  const models = [
+    { url: pub("chicken.glb"), size: 3.6 },
+    { url: pub("chicken_wing_2.glb"), size: 4.5 },
+    { url: pub("chicken_nugget.glb"), size: 4.0 },
+    { url: pub("fried_chicken_lowpoly.glb"), size: 3.8 }
+  ];
+
+  // Landing animation happens between sp 0.05 and 0.20
+  const fallProgress = easeOut(Math.min(1, Math.max(0,(sp-0.05)/0.15)));
+  
+  // Model swap sequence starts after landing (sp > 0.25)
+  // We divide the remaining scroll space [0.25, 0.80] into 4 segments
+  const sequenceStart = 0.25;
+  const sequenceEnd = 0.80;
+  const modelIndex = sp < sequenceStart ? 0 : Math.min(models.length - 1, Math.floor(((sp - sequenceStart) / (sequenceEnd - sequenceStart)) * models.length));
+  
+  const currentModel = useModel(models[modelIndex].url, models[modelIndex].size);
+  const g = useRef();
+
+  useFrame(() => {
+    if(!g.current) return;
+    const e = easeInOut(Math.max(0,(sp-0.80)/0.20));
+    
+    // Position: Falling -> Landed on Plate -> Exit
+    const yPos = sp < sequenceStart ? lerp(10, -2.2, fallProgress) : -2.2;
+    g.current.position.set(lerp(0, -20, e), yPos, 1.3);
+    
+    // Gentle rotation
     g.current.rotation.x = Math.PI / 2 - 0.2;
+    if (sp > sequenceStart) {
+      g.current.rotation.y += 0.01; // slow spin once landed
+    }
   });
-  return <group ref={g}><primitive object={clone} scale={sc}/></group>;
+
+  return (
+    <group ref={g}>
+      {currentModel && <primitive object={currentModel.clone} scale={currentModel.sc} />}
+    </group>
+  );
 }
 
 // ── COLA — very big, enters from bottom-left, lands LEFT of scene ──────
@@ -177,7 +206,7 @@ function Scene({sp,mouseRef}){
       <pointLight position={[0,8,0]} intensity={sp>0.3&&sp<0.75?6:0} color="#F97316"/>
       <Environment preset="city"/>
       <Plate sp={sp}/>
-      <Chicken sp={sp}/>
+      <DynamicChicken sp={sp}/>
       <Mayo sp={sp}/>
       <Cola sp={sp}/>
       <Burger sp={sp}/>

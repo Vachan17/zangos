@@ -23,6 +23,28 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.post("/", async (req, res) => {
+  try {
+    const item = new MenuItem(req.body);
+    await item.save();
+    res.json(item);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+router.put("/:id", async (req, res) => {
+  try {
+    const item = await MenuItem.findByIdAndUpdate(req.id || req.params.id, req.body, { new: true });
+    res.json(item);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+router.delete("/:id", async (req, res) => {
+  try {
+    await MenuItem.findByIdAndDelete(req.id || req.params.id);
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 router.post("/seed", async (req, res) => {
   try {
     await MenuItem.deleteMany({});

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { io } from "socket.io-client";
-import { SOCKET_URL } from "../config";
+import { API_BASE, SOCKET_URL } from "../config";
 
 const STATUS_FLOW  = ["new", "confirmed", "preparing", "ready", "delivered"];
 const STATUS_COLOR = {
@@ -124,7 +124,7 @@ export default function EmployeeDashboard() {
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
-    fetch(`${SOCKET_URL}/api/orders`)
+    fetch(`${API_BASE}/api/orders`)
       .then(r => r.json())
       .then(setOrders)
       .catch(console.error);
@@ -132,7 +132,7 @@ export default function EmployeeDashboard() {
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
-    const socket = io(SOCKET_URL, { transports: ["websocket"] });
+    const socket = io(SOCKET_URL ?? undefined, { transports: ["websocket"] });
     socketRef.current = socket;
     socket.on("connect", () => { setConnected(true); socket.emit("join_employee"); });
     socket.on("disconnect", () => setConnected(false));
@@ -150,7 +150,7 @@ export default function EmployeeDashboard() {
 
   const updateStatus = async (orderId, status) => {
     try {
-      await fetch(`${SOCKET_URL}/api/orders/${orderId}/status`, {
+      await fetch(`${API_BASE}/api/orders/${orderId}/status`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status }),
@@ -161,7 +161,7 @@ export default function EmployeeDashboard() {
 
   const markPaid = async (orderId) => {
     try {
-      await fetch(`${SOCKET_URL}/api/orders/${orderId}/payment`, {
+      await fetch(`${API_BASE}/api/orders/${orderId}/payment`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
       });
