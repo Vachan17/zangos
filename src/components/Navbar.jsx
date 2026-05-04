@@ -37,8 +37,12 @@ function Navbar({ cartCount=0, onCartClick, orderCount=0, onHistoryClick, user, 
       }}>
         {/* Logo */}
         <div onClick={() => window.scrollTo({ top:0, behavior:"smooth" })}
-          style={{ display:"flex", alignItems:"center", gap:"0.8rem", cursor:"pointer", flexShrink:0 }}>
-          <img src={`${import.meta.env.BASE_URL}zb.jpeg`} alt="Zangos Logo" style={{ width:42, height:42, borderRadius:"50%", objectFit:"cover", border:"2px solid #F97316", boxShadow:"0 0 15px rgba(249,115,22,0.3)" }} />
+          style={{ display:"flex", alignItems:"center", gap:"0.6rem", cursor:"pointer", flexShrink:0 }}>
+          <video 
+            src={`${import.meta.env.BASE_URL}zangoslogo.mp4`} 
+            autoPlay loop muted playsInline 
+            style={{ width:48, height:48, borderRadius:"50%", objectFit:"cover", border:"2px solid #F97316", boxShadow:"0 0 15px rgba(249,115,22,0.3)" }} 
+          />
           <span style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:"1.8rem", letterSpacing:"0.1em", color:"#fff" }}>ZANGOS</span>
         </div>
 

@@ -93,4 +93,34 @@ router.patch("/:id/payment", async (req, res) => {
   }
 });
 
+// DELETE /api/orders/reset — delete all orders
+router.delete("/reset", async (req, res) => {
+  try {
+    const password = req.headers["x-admin-password"];
+    if (password !== "zangos@777") return res.status(403).json({ error: "Unauthorized" });
+    
+    await Order.deleteMany({});
+    res.json({ success: true, message: "All order data has been reset." });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/orders/export — CSV export
+router.get("/export", async (req, res) => {
+  try {
+    const orders = await Order.find({ status: { $ne: "cancelled" } }).sort({ createdAt: -1 });
+    let csv = "Order No,Date,Customer,Phone,Amount,Status,Items\n";
+    orders.forEach(o => {
+      const items = o.items.map(i => `${i.qty}x ${i.name}`).join(" | ");
+      csv += `${o.orderNumber},"${new Date(o.createdAt).toLocaleString()}",${o.customer.name},${o.customer.phone},${o.totalAmount},${o.status},"${items}"\n`;
+    });
+    res.setHeader("Content-Type", "text/csv");
+    res.setHeader("Content-Disposition", "attachment; filename=zangos_sales_report.csv");
+    res.send(csv);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 export default router;

@@ -189,6 +189,31 @@ export default function EmployeeDashboard() {
     { label: "Ready to Serve", value: preparedFood, accent: "#D0161B", icon: "🎉" },
   ];
 
+  const handleReset = async () => {
+    const pw = prompt("DANGER: This will delete ALL orders. Enter admin password to confirm:");
+    if (pw !== "zangos@777") return;
+    
+    if (!confirm("Are you ABSOLUTELY sure? This cannot be undone.")) return;
+    
+    try {
+      const res = await fetch(`${API_BASE}/api/orders/reset`, {
+        method: "DELETE",
+        headers: { "x-admin-password": pw }
+      });
+      if (res.ok) {
+        setOrders([]);
+        alert("System reset successfully.");
+      } else {
+        const data = await res.json();
+        alert(data.error || "Reset failed.");
+      }
+    } catch (err) { alert(err.message); }
+  };
+
+  const handleDownload = () => {
+    window.open(`${API_BASE}/api/orders/export`, "_blank");
+  };
+
   return (
     <div style={{ minHeight: "100vh", background: "#F8F4F0", fontFamily: "'Barlow', sans-serif", color: "#1c0a00" }}>
       <style>{`
@@ -221,7 +246,23 @@ export default function EmployeeDashboard() {
           }}>Kitchen Display</span>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "1.5rem" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+          <button onClick={handleDownload} style={{
+            background: "#16A34A", color: "#fff", border: "none",
+            borderRadius: "0.4rem", padding: "0.5rem 1rem",
+            fontFamily: "'Barlow', sans-serif", fontWeight: 800,
+            fontSize: "0.7rem", cursor: "pointer", display: "flex", alignItems: "center", gap: "0.4rem"
+          }}>📥 DOWNLOAD REPORT</button>
+          
+          <button onClick={handleReset} style={{
+            background: "#fff", color: "#D0161B", border: "1.5px solid #D0161B",
+            borderRadius: "0.4rem", padding: "0.45rem 1rem",
+            fontFamily: "'Barlow', sans-serif", fontWeight: 800,
+            fontSize: "0.7rem", cursor: "pointer"
+          }}>🗑️ RESET SYSTEM</button>
+
+          <div style={{ height: "24px", width: "1px", background: "rgba(0,0,0,0.1)", margin: "0 0.5rem" }} />
+
           {newCount > 0 && (
             <div style={{
               background: "#D0161B", color: "#fff",

@@ -44,8 +44,9 @@ function CameraRig({sp,mouseRef}){
 // Normalize model: scale to targetSize, bottom sits at y=0, centered on x/z
 function useModel(url, targetSize, removeNodes=[]){
   const {scene}=useGLTF(url);
-  const cache=useRef(null);
-  if(!cache.current){
+  const cache=useRef({}); // Keyed by URL
+  
+  if(!cache.current[url]){
     const clone=scene.clone(true);
     if(removeNodes.length>0){
       const toRemove=[];
@@ -60,9 +61,9 @@ function useModel(url, targetSize, removeNodes=[]){
     const sc=targetSize/Math.max(sz.x,sz.y,sz.z,0.001);
     // center x/z, lift so bottom is at y=0
     clone.position.set(-ctr.x*sc, -box.min.y*sc, -ctr.z*sc);
-    cache.current={clone,sc};
+    cache.current[url]={clone,sc};
   }
-  return cache.current;
+  return cache.current[url];
 }
 
 // ── PLATE — slides in from left, sits at y=-2 ─────────────────────────────────
@@ -82,36 +83,53 @@ function Plate({sp}){
 function DynamicChicken({sp}){
   const models = [
     { url: pub("chicken.glb"), size: 3.6 },
-    { url: pub("chicken_wing_2.glb"), size: 4.5 },
-    { url: pub("chicken_nugget.glb"), size: 4.0 },
-    { url: pub("fried_chicken_lowpoly.glb"), size: 3.8 }
+    { url: pub("chicken_wing_2.glb"), size: 2.8 },
+    { url: pub("chicken_nugget.glb"), size: 2.5, tint: "#4B2C20" },
+    { url: pub("fried_chicken_lowpoly.glb"), size: 3.0 }
   ];
 
   // Landing animation happens between sp 0.05 and 0.20
   const fallProgress = easeOut(Math.min(1, Math.max(0,(sp-0.05)/0.15)));
   
-  // Model swap sequence starts after landing (sp > 0.25)
-  // We divide the remaining scroll space [0.25, 0.80] into 4 segments
-  const sequenceStart = 0.25;
-  const sequenceEnd = 0.80;
-  const modelIndex = sp < sequenceStart ? 0 : Math.min(models.length - 1, Math.floor(((sp - sequenceStart) / (sequenceEnd - sequenceStart)) * models.length));
+  // Model swap sequence: every 0.12 scroll progress starting at 0.22
+  const sequenceStart = 0.22;
+  const interval = 0.12;
+  const modelIndex = sp < sequenceStart ? 0 : Math.min(models.length - 1, Math.floor((sp - sequenceStart) / interval) + 1);
   
   const currentModel = useModel(models[modelIndex].url, models[modelIndex].size);
   const g = useRef();
+
+  useEffect(() => {
+    if (currentModel && models[modelIndex].tint) {
+      currentModel.clone.traverse(c => {
+        if (c.isMesh) {
+          c.material.color.set(models[modelIndex].tint);
+          // Also darken it a bit for that "blackish" look
+          c.material.roughness = 0.8;
+          c.material.metalness = 0.2;
+        }
+      });
+    }
+  }, [currentModel, modelIndex]);
 
   useFrame(() => {
     if(!g.current) return;
     const e = easeInOut(Math.max(0,(sp-0.80)/0.20));
     
     // Position: Falling -> Landed on Plate -> Exit
-    const yPos = sp < sequenceStart ? lerp(10, -2.2, fallProgress) : -2.2;
+    const yPos = sp < 0.20 ? lerp(10, -2.2, fallProgress) : -2.2;
     g.current.position.set(lerp(0, -20, e), yPos, 1.3);
     
     // Gentle rotation
     g.current.rotation.x = Math.PI / 2 - 0.2;
-    if (sp > sequenceStart) {
-      g.current.rotation.y += 0.01; // slow spin once landed
-    }
+    // g.current.rotation.y += 0.015; // Stopped rotation as requested
+
+    // Quick scale effect on swap
+    const progressInInterval = ((sp - sequenceStart) % interval) / interval;
+    const scalePulse = sp > sequenceStart && progressInInterval < 0.2 
+      ? 1.0 + Math.sin(progressInInterval * Math.PI * 5) * 0.1 
+      : 1.0;
+    g.current.scale.set(scalePulse, scalePulse, scalePulse);
   });
 
   return (
@@ -322,6 +340,9 @@ export default function Hero3D(){
 
 useGLTF.preload(pub("plate.glb"));
 useGLTF.preload(pub("chicken.glb"));
+useGLTF.preload(pub("chicken_wing_2.glb"));
+useGLTF.preload(pub("chicken_nugget.glb"));
+useGLTF.preload(pub("fried_chicken_lowpoly.glb"));
 useGLTF.preload(pub("cola.glb"));
 useGLTF.preload(pub("burger.glb"));
 useGLTF.preload(pub("chilli.glb"));

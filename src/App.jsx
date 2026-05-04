@@ -277,13 +277,19 @@ function AuthPage({ onLogin }) {
         {/* Brand Header */}
         <div style={{
           background: "linear-gradient(135deg, #D0161B 0%, #F97316 100%)",
-          padding: "2rem 2rem 1.5rem",
+          padding: "2.5rem 2rem 2rem",
           textAlign: "center",
         }}>
+          <video 
+            src="zangoslogo.mp4" 
+            autoPlay loop muted playsInline 
+            style={{ width:80, height:80, borderRadius:"50%", objectFit:"cover", border:"3px solid rgba(255,255,255,0.3)", marginBottom:"1rem", boxShadow:"0 8px 25px rgba(0,0,0,0.2)" }} 
+          />
           <div style={{
             fontFamily: "'Bebas Neue',sans-serif", fontSize: "2.8rem",
             letterSpacing: "0.12em", color: "#fff",
             textShadow: "0 2px 12px rgba(0,0,0,0.25)",
+            lineHeight: 1
           }}>ZANGOS</div>
           <div style={{ color: "rgba(255,255,255,0.85)", fontSize: "0.8rem", fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase" }}>
             {mode === "signin" ? "Welcome Back 🔥" : "Join the Family 🔥"}

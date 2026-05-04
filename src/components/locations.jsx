@@ -224,7 +224,7 @@ export default function Locations() {
             fontFamily: "var(--font-body)", fontSize: "0.75rem",
             color: "#555", letterSpacing: "0.05em",
           }}>
-            Follow us @zangos_ka.india · www.zangoshotchicken.com
+            Follow us @zangos.india · www.zangoshotchicken.com
           </p>
         </div>
       </section>
