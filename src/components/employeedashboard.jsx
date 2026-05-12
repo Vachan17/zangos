@@ -148,6 +148,7 @@ export default function EmployeeDashboard() {
     return () => socket.disconnect();
   }, []);
 
+
   const updateStatus = async (orderId, status) => {
     try {
       await fetch(`${API_BASE}/api/orders/${orderId}/status`, {
@@ -174,17 +175,10 @@ export default function EmployeeDashboard() {
   const filtered = filter === "all" ? orders : orders.filter(o => o.status === filter);
   const newCount  = orders.filter(o => o.status === "new").length;
 
-  const validOrders    = orders.filter(o => o.status !== "cancelled");
-  const overallSale    = validOrders.reduce((sum, o) => sum + o.totalAmount, 0);
-  const profit         = Math.round(overallSale * 0.35);
-  const unitsSold      = validOrders.reduce((sum, o) => sum + o.items.reduce((acc, i) => acc + i.qty, 0), 0);
   const pendingToPrepare = orders.filter(o => o.status === "new" || o.status === "confirmed").length;
   const preparedFood   = orders.filter(o => o.status === "ready").length;
 
   const statCards = [
-    { label: "Overall Sales", value: `₹${overallSale}`, accent: "#16A34A", icon: "💰" },
-    { label: "Est. Profit (35%)", value: `₹${profit}`, accent: "#2563EB", icon: "📈" },
-    { label: "Units Sold", value: unitsSold, accent: "#7C3AED", icon: "🍗" },
     { label: "Pending to Prepare", value: pendingToPrepare, accent: "#EA580C", icon: "⏳" },
     { label: "Ready to Serve", value: preparedFood, accent: "#D0161B", icon: "🎉" },
   ];
@@ -243,7 +237,8 @@ export default function EmployeeDashboard() {
             color: "#D0161B", fontSize: "0.62rem", fontWeight: 800,
             letterSpacing: "0.12em", textTransform: "uppercase",
             padding: "0.25rem 0.8rem", borderRadius: "2rem",
-          }}>Kitchen Display</span>
+          }}>Kitchen Workflow</span>
+          
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
@@ -253,6 +248,7 @@ export default function EmployeeDashboard() {
             fontFamily: "'Barlow', sans-serif", fontWeight: 800,
             fontSize: "0.7rem", cursor: "pointer", display: "flex", alignItems: "center", gap: "0.4rem"
           }}>📥 DOWNLOAD REPORT</button>
+          
           
           <button onClick={handleReset} style={{
             background: "#fff", color: "#D0161B", border: "1.5px solid #D0161B",

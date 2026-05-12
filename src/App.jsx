@@ -1,19 +1,106 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { io } from "socket.io-client";
 import Navbar        from "./components/Navbar";
-import Hero          from "./hero";
-import MenuSection   from "./components/MenuSection";
-import About         from "./components/about";
-import Locations     from "./components/locations";
-import Footer        from "./components/Footer";
-import Cart          from "./components/cart";
-import OrderModal    from "./components/ordermodal";
-import OrderSuccess  from "./components/ordersuccess";
-import OrderHistory  from "./components/orderhistory";
-import AuthModal     from "./components/authmodal";
-import EmployeeDashboard from "./components/employeedashboard";
 import { API_BASE, SOCKET_URL } from "./config";
 import "./index.css";
+
+// Lazy load heavy components
+const Hero = lazy(() => import("./hero"));
+const MenuSection = lazy(() => import("./components/MenuSection"));
+const About = lazy(() => import("./components/about"));
+const Locations = lazy(() => import("./components/locations"));
+const Footer = lazy(() => import("./components/Footer"));
+const Cart = lazy(() => import("./components/cart"));
+const OrderModal = lazy(() => import("./components/ordermodal"));
+const OrderSuccess = lazy(() => import("./components/ordersuccess"));
+const OrderHistory = lazy(() => import("./components/orderhistory"));
+const AuthModal = lazy(() => import("./components/authmodal"));
+const EmployeeDashboard = lazy(() => import("./components/employeedashboard"));
+
+const LoadingSpinner = () => <div style={{ padding: "2rem", textAlign: "center", color: "#92400e" }}>Loading...</div>;
+
+function CustomCursor() {
+  const [pos, setPos] = useState({ x: -100, y: -100 });
+  const [trail, setTrail] = useState({ x: -100, y: -100 });
+  const [hovered, setHovered] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const onMove = (e) => {
+      setPos({ x: e.clientX, y: e.clientY });
+      if (!isVisible) setIsVisible(true);
+    };
+    const onLeave = () => setIsVisible(false);
+    const onEnter = () => setIsVisible(true);
+
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseout", onLeave);
+    window.addEventListener("mouseover", onEnter);
+    
+    let raf;
+    const tick = () => {
+      setTrail(prev => ({
+        x: prev.x + (pos.x - prev.x) * 0.15,
+        y: prev.y + (pos.y - prev.y) * 0.15
+      }));
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+
+    const checkHover = (e) => {
+      const target = e.target;
+      if (target.closest("button, a, input, [role='button'], .clickable")) {
+        setHovered(true);
+      } else {
+        setHovered(false);
+      }
+    };
+    window.addEventListener("mouseover", checkHover);
+
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseout", onLeave);
+      window.removeEventListener("mouseover", onEnter);
+      window.removeEventListener("mouseover", checkHover);
+      cancelAnimationFrame(raf);
+    };
+  }, [pos, isVisible]);
+
+  if (!isVisible) return null;
+
+  return (
+    <>
+      <style>{`
+        @media (pointer: fine) {
+          body, button, a, input, select, textarea { cursor: none !important; }
+        }
+        .grain {
+          position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+          background: url("https://grains.y78.fr/grains.png");
+          opacity: 0.04; pointer-events: none; z-index: 9999;
+        }
+      `}</style>
+      <div className="grain" />
+      <div style={{
+        position: "fixed", top: 0, left: 0,
+        width: 6, height: 6, background: "#D0161B", borderRadius: "50%",
+        transform: `translate(calc(${pos.x}px - 50%), calc(${pos.y}px - 50%))`,
+        pointerEvents: "none", zIndex: 10001,
+        boxShadow: "0 0 8px 1px #D0161B, 0 0 20px 4px rgba(208, 22, 27, 0.8), 0 0 40px 8px rgba(208, 22, 27, 0.4), 0 0 60px 12px rgba(249, 115, 22, 0.2)",
+        filter: "drop-shadow(0 0 3px rgba(249, 115, 22, 0.6))",
+      }} />
+      <div style={{
+        position: "fixed", top: 0, left: 0,
+        width: hovered ? 44 : 26, height: hovered ? 44 : 26,
+        border: "1.5px solid #D0161B", borderRadius: "50%",
+        transform: `translate(calc(${trail.x}px - 50%), calc(${trail.y}px - 50%))`,
+        pointerEvents: "none", zIndex: 10000,
+        transition: "width 0.25s cubic-bezier(0.23, 1, 0.32, 1), height 0.25s cubic-bezier(0.23, 1, 0.32, 1), background 0.25s",
+        background: hovered ? "rgba(208, 22, 27, 0.15)" : "transparent",
+      }} />
+    </>
+  );
+}
 
 const CATEGORIES = ["All","Fried Chicken","Tenders","Wings","Burgers","Wraps","French Fries"];
 
@@ -149,17 +236,27 @@ function CustomerApp({ initialUser }) {
         onAuthClick={() => setAuthOpen(true)}
         onLogout={logout}
       />
-      <Hero />
-      <MenuSection
-        items={filtered} categories={CATEGORIES}
-        activeCategory={activeCategory}
-        onCategoryChange={setActiveCategory}
-        loading={loadingMenu} onAddToCart={addToCart}
-        user={user} onMenuUpdate={refreshMenu}
-      />
-      <About />
-      <Locations onOrderNow={() => document.getElementById("menu")?.scrollIntoView({ behavior:"smooth" })} />
-      <Footer />
+      <Suspense fallback={<LoadingSpinner />}>
+        <Hero />
+      </Suspense>
+      <Suspense fallback={<LoadingSpinner />}>
+        <MenuSection
+          items={filtered} categories={CATEGORIES}
+          activeCategory={activeCategory}
+          onCategoryChange={setActiveCategory}
+          loading={loadingMenu} onAddToCart={addToCart}
+          user={user} onMenuUpdate={refreshMenu}
+        />
+      </Suspense>
+      <Suspense fallback={<LoadingSpinner />}>
+        <About />
+      </Suspense>
+      <Suspense fallback={<LoadingSpinner />}>
+        <Locations onOrderNow={() => document.getElementById("menu")?.scrollIntoView({ behavior:"smooth" })} />
+      </Suspense>
+      <Suspense fallback={<LoadingSpinner />}>
+        <Footer />
+      </Suspense>
 
       {/* Floating cart bubble */}
       {cartCount > 0 && !cartOpen && (
@@ -179,12 +276,12 @@ function CustomerApp({ initialUser }) {
       )}
 
       {cartOpen && <div onClick={() => setCartOpen(false)} style={{ position:"fixed", inset:0, zIndex:1999, background:"rgba(28,10,0,0.45)", backdropFilter:"blur(4px)" }} />}
-      {cartOpen && <Cart cart={cart} onRemove={removeFromCart} onQtyChange={changeQty} onCheckout={() => { setCartOpen(false); setCheckoutOpen(true); }} onClose={() => setCartOpen(false)} />}
+      {cartOpen && <Suspense fallback={null}><Cart cart={cart} onRemove={removeFromCart} onQtyChange={changeQty} onCheckout={() => { setCartOpen(false); setCheckoutOpen(true); }} onClose={() => setCartOpen(false)} /></Suspense>}
 
-      {checkoutOpen && <OrderModal cart={cart} user={user} onClose={() => setCheckoutOpen(false)} onSuccess={handleSuccess} />}
-      {successOrder  && <OrderSuccess order={successOrder} onClose={() => setSuccessOrder(null)} />}
-      {historyOpen   && <OrderHistory orders={orderHistory} onClose={() => setHistoryOpen(false)} />}
-      {authOpen      && <AuthModal onClose={() => setAuthOpen(false)} onLogin={setUser} />}
+      {checkoutOpen && <Suspense fallback={<LoadingSpinner />}><OrderModal cart={cart} user={user} onClose={() => setCheckoutOpen(false)} onSuccess={handleSuccess} /></Suspense>}
+      {successOrder  && <Suspense fallback={null}><OrderSuccess order={successOrder} onClose={() => setSuccessOrder(null)} /></Suspense>}
+      {historyOpen   && <Suspense fallback={<LoadingSpinner />}><OrderHistory orders={orderHistory} onClose={() => setHistoryOpen(false)} /></Suspense>}
+      {authOpen      && <Suspense fallback={<LoadingSpinner />}><AuthModal onClose={() => setAuthOpen(false)} onLogin={setUser} /></Suspense>}
 
       {/* Customer Toast Notification */}
       {toast && (
@@ -289,8 +386,26 @@ function AuthPage({ onLogin }) {
             fontFamily: "'Bebas Neue',sans-serif", fontSize: "2.8rem",
             letterSpacing: "0.12em", color: "#fff",
             textShadow: "0 2px 12px rgba(0,0,0,0.25)",
-            lineHeight: 1
-          }}>ZANGOS</div>
+            lineHeight: 1,
+            perspective: "600px",
+            display: "inline-block",
+            transformStyle: "preserve-3d"
+          }}>
+            {["Z", "A", "N", "G", "O", "S"].map((letter, i) => {
+              const rotAngle = [35, 28, 21, 14, 7, 0][i];
+              return (
+                <span key={i} style={{
+                  display: "inline-block",
+                  transform: `rotateY(${rotAngle}deg) rotateZ(${rotAngle * 0.3}deg)`,
+                  transformStyle: "preserve-3d",
+                  transformOrigin: "center",
+                  textShadow: `${rotAngle * 0.4}px 2px 8px rgba(0,0,0,0.3)`
+                }}>
+                  {letter}
+                </span>
+              );
+            })}
+          </div>
           <div style={{ color: "rgba(255,255,255,0.85)", fontSize: "0.8rem", fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase" }}>
             {mode === "signin" ? "Welcome Back 🔥" : "Join the Family 🔥"}
           </div>
@@ -392,6 +507,10 @@ export default function App() {
   const handleLogin = (u) => setUser(u);
 
   if (currentHash === "#/employee") return <EmployeeDashboard />;
-  if (!user) return <AuthPage onLogin={handleLogin} />;
-  return <CustomerApp initialUser={user} />;
+  return (
+    <>
+      <CustomCursor />
+      <CustomerApp initialUser={user} />
+    </>
+  );
 }

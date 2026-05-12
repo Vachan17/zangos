@@ -9,14 +9,7 @@ const LOCATIONS = [
         phone: "+91 91136 67554",
         tag: "MAIN BRANCH",
         highlight: true,
-      },
-      {
-        name: "Zangos Bengaluru",
-        address: "Koramangala 4th Block, Bengaluru",
-        hours: "11:00 AM – 11:00 PM",
-        phone: "+91 98765 43210",
-        tag: "",
-      },
+      }
     ]
   },
   {
@@ -56,99 +49,102 @@ export default function Locations() {
     <>
       {/* LOCATIONS */}
       <section id="locations" style={{
-        padding: "7rem 2rem",
+        padding: "8rem 2rem",
         background: "#000",
       }}>
-        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-          <div style={{ textAlign: "center", marginBottom: "4rem" }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+          <div style={{ textAlign: "center", marginBottom: "6rem" }}>
             <span style={{
-              fontFamily: "var(--font-body)", fontWeight: 800,
-              fontSize: "0.7rem", letterSpacing: "0.35em",
+              fontFamily: "'Barlow', sans-serif", fontWeight: 800,
+              fontSize: "0.75rem", letterSpacing: "0.4em",
               textTransform: "uppercase", color: "#F97316",
-              display: "block", marginBottom: "0.8rem",
+              display: "block", marginBottom: "1rem",
             }}>
-              — GLOBAL PRESENCE —
+              EXPLORE
             </span>
             <h2 style={{
-              fontFamily: "var(--font-display)",
-              fontSize: "clamp(2.5rem, 6vw, 5rem)",
-              letterSpacing: "0.05em", color: "#fff", lineHeight: 1,
+              fontFamily: "'Bebas Neue', sans-serif",
+              fontSize: "clamp(3rem, 7vw, 6rem)",
+              letterSpacing: "0.02em", color: "#fff", lineHeight: 0.9,
             }}>
               OUR LOCATIONS
             </h2>
           </div>
 
           {LOCATIONS.map((countryGroup, idx) => (
-            <div key={idx} style={{ marginBottom: "4rem" }}>
+            <div key={idx} style={{ marginBottom: "5rem" }}>
               <div style={{ 
-                display: "flex", alignItems: "center", gap: "1rem", marginBottom: "2rem" 
+                display: "flex", alignItems: "center", gap: "1.5rem", marginBottom: "3rem" 
               }}>
                 <h3 style={{ 
-                  fontFamily: "'Bebas Neue', sans-serif", fontSize: "1.8rem", 
+                  fontFamily: "'Bebas Neue', sans-serif", fontSize: "2rem", 
                   color: "#fff", letterSpacing: "0.1em", margin: 0 
                 }}>
                   {countryGroup.country}
                 </h3>
-                <div style={{ flex: 1, height: "1px", background: "rgba(255,255,255,0.1)" }} />
+                <div style={{ flex: 1, height: "1px", background: "rgba(255,255,255,0.05)" }} />
               </div>
 
               <div style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-                gap: "1.5rem",
+                gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))",
+                gap: "2rem",
               }}>
                 {countryGroup.branches.map((loc, i) => (
                   <div key={i} style={{
-                    background: loc.highlight ? "linear-gradient(145deg, #2a0800, #121212)" : "linear-gradient(145deg, #161616, #0a0a0a)",
-                    border: loc.highlight ? "2px solid #F97316" : "1px solid rgba(255,255,255,0.08)",
-                    borderRadius: "1.2rem",
-                    padding: "2.5rem",
-                    transition: "all 0.3s ease",
+                    background: "rgba(255,255,255,0.02)",
+                    border: loc.highlight ? "1px solid #F97316" : "1px solid rgba(255,255,255,0.05)",
+                    borderRadius: "0.5rem",
+                    padding: "3rem",
+                    transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
                     position: "relative",
-                    overflow: "hidden",
-                    boxShadow: loc.highlight ? "0 20px 50px rgba(249,115,22,0.15)" : "none",
                   }}
                     onMouseEnter={e => {
-                      if (!loc.highlight) e.currentTarget.style.borderColor = "rgba(249,115,22,0.5)";
-                      e.currentTarget.style.transform = "translateY(-8px)";
+                      e.currentTarget.style.background = "rgba(255,255,255,0.04)";
+                      e.currentTarget.style.borderColor = "#F97316";
+                      e.currentTarget.style.transform = "translateY(-5px)";
                     }}
                     onMouseLeave={e => {
-                      if (!loc.highlight) e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)";
+                      e.currentTarget.style.background = "rgba(255,255,255,0.02)";
+                      e.currentTarget.style.borderColor = loc.highlight ? "#F97316" : "rgba(255,255,255,0.05)";
                       e.currentTarget.style.transform = "none";
                     }}
                   >
                     {loc.highlight && (
                       <div style={{
-                        position: "absolute", top: 15, right: 15,
-                        background: "#F97316", color: "#fff",
+                        position: "absolute", top: 20, right: 20,
+                        background: "#F97316", color: "#000",
                         fontFamily: "'Barlow', sans-serif", fontWeight: 900,
-                        fontSize: "0.6rem", padding: "0.25rem 0.7rem",
-                        borderRadius: "2rem", letterSpacing: "0.1em"
-                      }}>MAIN HUB</div>
+                        fontSize: "0.65rem", padding: "0.3rem 0.8rem",
+                        borderRadius: "0.2rem", letterSpacing: "0.1em",
+                        textTransform: "uppercase"
+                      }}>Signature Branch</div>
                     )}
 
-                    <div style={{ fontSize: "2rem", marginBottom: "1rem" }}>{loc.country === "SAUDI ARABIA" ? "⏳" : "📍"}</div>
                     <h4 style={{
-                      fontFamily: "var(--font-display)",
-                      fontSize: "1.6rem", letterSpacing: "0.05em",
-                      color: "#fff", marginBottom: "0.8rem",
+                      fontFamily: "'Bebas Neue', sans-serif",
+                      fontSize: "2.2rem", letterSpacing: "0.05em",
+                      color: "#fff", marginBottom: "1rem",
                     }}>
                       {loc.name.toUpperCase()}
                     </h4>
 
                     <p style={{
-                      fontFamily: "var(--font-body)", fontSize: "0.9rem",
-                      color: "#aaa", lineHeight: 1.6, marginBottom: "1.5rem",
+                      fontFamily: "'Barlow', sans-serif", fontSize: "0.95rem",
+                      color: "#888", lineHeight: 1.6, marginBottom: "2rem",
+                      minHeight: "3.2rem"
                     }}>
                       {loc.address}
                     </p>
 
-                    <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: "1.5rem" }}>
-                      <div style={{ fontSize: "0.85rem", color: "#ddd", fontFamily: "var(--font-body)", fontWeight: 600 }}>
-                        <span style={{ color: "#F97316", marginRight: "0.5rem" }}>🕐</span> {loc.hours}
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", borderTop: "1px solid rgba(255,255,255,0.05)", paddingTop: "2rem" }}>
+                      <div>
+                        <div style={{ fontSize: "0.6rem", color: "#F97316", fontWeight: 900, textTransform: "uppercase", marginBottom: "0.3rem", letterSpacing: "0.1em" }}>Hours</div>
+                        <div style={{ fontSize: "0.85rem", color: "#fff", fontWeight: 600 }}>{loc.hours}</div>
                       </div>
-                      <div style={{ fontSize: "0.85rem", color: "#ddd", fontFamily: "var(--font-body)", fontWeight: 600 }}>
-                        <span style={{ color: "#F97316", marginRight: "0.5rem" }}>📞</span> {loc.phone}
+                      <div>
+                        <div style={{ fontSize: "0.6rem", color: "#F97316", fontWeight: 900, textTransform: "uppercase", marginBottom: "0.3rem", letterSpacing: "0.1em" }}>Connect</div>
+                        <div style={{ fontSize: "0.85rem", color: "#fff", fontWeight: 600 }}>{loc.phone}</div>
                       </div>
                     </div>
                   </div>

@@ -51,18 +51,36 @@ export default function MenuSection({ items, categories, activeCategory, onCateg
       </div>
 
       {/* Category filters */}
-      <div style={{ display:"flex", gap:"0.6rem", justifyContent:"center", flexWrap:"wrap", marginBottom:"3rem" }}>
-        {categories.map(cat => (
-          <button key={cat} onClick={() => onCategoryChange(cat)} style={{
-            fontFamily:"'Barlow',sans-serif", fontWeight:700,
-            fontSize:"0.72rem", letterSpacing:"0.1em", textTransform:"uppercase",
-            padding:"0.55rem 1.3rem", borderRadius:"2rem",
-            border: activeCategory === cat ? "none" : "1.5px solid rgba(249,115,22,0.3)",
-            background: activeCategory === cat ? "#F97316" : "#fff",
-            color: activeCategory === cat ? "#fff" : "#92400e",
-            cursor:"pointer", transition:"all 0.22s ease",
-            boxShadow: activeCategory === cat ? "0 4px 16px rgba(249,115,22,0.35)" : "none",
-          }}>
+      <div style={{ display:"flex", gap:"0.8rem", justifyContent:"center", flexWrap:"wrap", marginBottom:"4rem" }}>
+        {categories.map((cat, i) => (
+          <button 
+            key={cat} 
+            onClick={() => onCategoryChange(cat)} 
+            style={{
+              fontFamily:"'Barlow',sans-serif", fontWeight:800,
+              fontSize:"0.75rem", letterSpacing:"0.12em", textTransform:"uppercase",
+              padding:"0.7rem 1.6rem", borderRadius:"0.5rem",
+              border: activeCategory === cat ? "none" : "1px solid rgba(0,0,0,0.1)",
+              background: activeCategory === cat ? "#111" : "#fff",
+              color: activeCategory === cat ? "#fff" : "#111",
+              cursor:"pointer", transition:"all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+              boxShadow: activeCategory === cat ? "0 10px 25px rgba(0,0,0,0.2)" : "0 4px 10px rgba(0,0,0,0.02)",
+              animation: `cardReveal 0.5s cubic-bezier(0.23, 1, 0.32, 1) backwards`,
+              animationDelay: `${i * 0.05}s`
+            }}
+            onMouseEnter={e => {
+              if (activeCategory !== cat) {
+                e.currentTarget.style.transform = "translateY(-3px)";
+                e.currentTarget.style.boxShadow = "0 8px 20px rgba(0,0,0,0.06)";
+              }
+            }}
+            onMouseLeave={e => {
+              if (activeCategory !== cat) {
+                e.currentTarget.style.transform = "none";
+                e.currentTarget.style.boxShadow = "0 4px 10px rgba(0,0,0,0.02)";
+              }
+            }}
+          >
             {cat}
           </button>
         ))}
@@ -75,11 +93,16 @@ export default function MenuSection({ items, categories, activeCategory, onCateg
         </div>
       ) : (
         <div style={{
-          display:"grid",
-          gridTemplateColumns:"repeat(auto-fill, minmax(280px, 1fr))",
-          gap:"1.5rem", maxWidth:1200, margin:"0 auto",
+          perspective: "1200px",
+          transformStyle: "preserve-3d",
+          animation: "boxPanIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards"
         }}>
-          {items.map(item => (
+          <div style={{
+            display:"grid",
+            gridTemplateColumns:"repeat(auto-fill, minmax(280px, 1fr))",
+            gap:"1.5rem", maxWidth:1200, margin:"0 auto",
+          }}>
+            {items.map((item, idx) => (
             <MenuCard 
               key={item._id} 
               item={item} 
@@ -87,8 +110,10 @@ export default function MenuSection({ items, categories, activeCategory, onCateg
               user={user}
               onEdit={() => setEditingItem(item)}
               onDelete={onMenuUpdate}
-            />
-          ))}
+                animationIndex={idx}
+              />
+            ))}
+          </div>
         </div>
       )}
 
@@ -100,6 +125,33 @@ export default function MenuSection({ items, categories, activeCategory, onCateg
           onSave={onMenuUpdate}
         />
       )}
+
+      <style>{`
+        @keyframes boxPanIn {
+          0% {
+            transform: rotateX(25deg) rotateY(-15deg) translateZ(-100px);
+            opacity: 0;
+          }
+          100% {
+            transform: rotateX(0) rotateY(0) translateZ(0);
+            opacity: 1;
+          }
+        }
+
+        @keyframes menuFlipZoom {
+          0% {
+            transform: rotateY(90deg) rotateX(20deg) scale(0.5);
+            opacity: 0;
+          }
+          70% {
+            transform: rotateY(-10deg) rotateX(-5deg) scale(1.05);
+          }
+          100% {
+            transform: rotateY(0) rotateX(0) scale(1);
+            opacity: 1;
+          }
+        }
+      `}</style>
     </section>
   );
 }

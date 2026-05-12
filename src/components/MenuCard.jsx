@@ -36,7 +36,7 @@ const CAT_IMG = {
   "French Fries":  "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=600&q=80",
 };
 
-function MenuCard({ item, onAddToCart, user, onEdit, onDelete }) {
+function MenuCard({ item, onAddToCart, user, onEdit, onDelete, animationIndex = 0 }) {
   const [flipped,     setFlipped]     = useState(false);
   const [hovered,     setHovered]     = useState(false);
   const [imgError,    setImgError]    = useState(false);
@@ -70,7 +70,15 @@ function MenuCard({ item, onAddToCart, user, onEdit, onDelete }) {
 
   return (
     <div
-      style={{ perspective:"1000px", cursor:"pointer", height:350 }}
+      className="menu-card-container"
+      style={{ 
+        perspective:"1200px", 
+        cursor:"pointer", 
+        height:380,
+        animation: `menuFlipZoom 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards`,
+        animationDelay: `${animationIndex * 0.05}s`,
+        transformStyle: "preserve-3d"
+      }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       onClick={() => setFlipped(f => !f)}
@@ -78,42 +86,42 @@ function MenuCard({ item, onAddToCart, user, onEdit, onDelete }) {
       <div style={{
         position:"relative", width:"100%", height:"100%",
         transformStyle:"preserve-3d",
-        transform: flipped ? "rotateY(180deg)" : hovered ? "rotateY(-7deg) rotateX(3deg) scale(1.03)" : "rotateY(0deg)",
-        transition:"transform 0.5s cubic-bezier(0.4,0.2,0.2,1)",
+        transform: flipped ? "rotateY(180deg)" : hovered ? "rotateY(-8deg) rotateX(4deg) scale(1.08) translateY(-12px)" : "rotateY(0deg)",
+        transition:"transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.5s ease",
       }}>
 
         {/* ── FRONT ── */}
         <div style={{
           position:"absolute", inset:0, backfaceVisibility:"hidden",
           background:"#fff",
-          borderRadius:"1rem",
-          border:`1.5px solid ${hovered && !flipped ? "#F97316" : "rgba(249,115,22,0.15)"}`,
+          borderRadius:"1.2rem",
+          border:`1px solid ${hovered && !flipped ? "rgba(208, 22, 27, 0.3)" : "rgba(0,0,0,0.06)"}`,
           boxShadow: hovered && !flipped
-            ? "0 20px 50px rgba(249,115,22,0.2)"
-            : "0 4px 20px rgba(0,0,0,0.08)",
+            ? "0 40px 80px rgba(208,22,27,0.2), 0 0 30px rgba(249,115,22,0.1)"
+            : "0 10px 30px rgba(0,0,0,0.04)",
           overflow:"hidden", display:"flex", flexDirection:"column",
-          transition:"border-color 0.3s, box-shadow 0.3s",
+          transition:"all 0.4s ease",
         }}>
           {/* Photo */}
-          <div style={{ height:160, position:"relative", overflow:"hidden", flexShrink:0 }}>
+          <div style={{ height:180, position:"relative", overflow:"hidden", flexShrink:0 }}>
             <img src={imgSrc} alt={item.name} onError={() => setImgError(true)} style={{
               width:"100%", height:"100%", objectFit:"cover", display:"block",
-              transform: hovered && !flipped ? "scale(1.07)" : "scale(1)",
-              transition:"transform 0.6s ease",
+              transform: hovered && !flipped ? "scale(1.12) rotate(1deg)" : "scale(1)",
+              transition:"transform 0.8s cubic-bezier(0.2, 0, 0.2, 1)",
             }} />
-            <div style={{ position:"absolute", inset:0, background:"linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.45) 100%)" }} />
+            <div style={{ position:"absolute", inset:0, background:"linear-gradient(to bottom, transparent 30%, rgba(0,0,0,0.5) 100%)", opacity: hovered ? 0.8 : 0.6, transition: "opacity 0.3s" }} />
 
             {/* Tags */}
             {item.tags?.length > 0 && (
-              <div style={{ position:"absolute", top:10, left:10, display:"flex", gap:"0.3rem", flexWrap:"wrap" }}>
+              <div style={{ position:"absolute", top:15, left:15, display:"flex", gap:"0.4rem", flexWrap:"wrap" }}>
                 {item.tags.slice(0,2).map(tag => (
                   <span key={tag} style={{
-                    fontFamily:"'Barlow',sans-serif", fontWeight:800, fontSize:"0.58rem",
-                    letterSpacing:"0.08em", textTransform:"uppercase",
-                    padding:"0.2rem 0.55rem", borderRadius:"2rem",
-                    background: TAG_COLORS[tag]?.bg || "#F97316",
+                    fontFamily:"'Barlow',sans-serif", fontWeight:800, fontSize:"0.6rem",
+                    letterSpacing:"0.1em", textTransform:"uppercase",
+                    padding:"0.25rem 0.7rem", borderRadius:"0.3rem",
+                    background: TAG_COLORS[tag]?.bg || "#D0161B",
                     color: TAG_COLORS[tag]?.text || "#fff",
-                    boxShadow:"0 2px 6px rgba(0,0,0,0.2)",
+                    boxShadow:"0 4px 10px rgba(0,0,0,0.2)",
                   }}>{tag}</span>
                 ))}
               </div>
@@ -121,48 +129,51 @@ function MenuCard({ item, onAddToCart, user, onEdit, onDelete }) {
 
             {/* Admin Controls */}
             {isAdmin && !flipped && (
-              <div style={{ position:"absolute", top:10, right:10, display:"flex", gap:"0.4rem" }}>
-                <button onClick={(e) => { e.stopPropagation(); onEdit(); }} style={{ background:"rgba(255,255,255,0.9)", border:"none", borderRadius:"50%", width:28, height:28, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"0.8rem" }}>✎</button>
-                <button onClick={doDelete} style={{ background:"rgba(208,22,27,0.9)", color:"#fff", border:"none", borderRadius:"50%", width:28, height:28, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"0.8rem" }}>✕</button>
+              <div style={{ position:"absolute", top:15, right:15, display:"flex", gap:"0.5rem" }}>
+                <button onClick={(e) => { e.stopPropagation(); onEdit(); }} style={{ background:"rgba(255,255,255,0.95)", border:"none", borderRadius:"0.4rem", width:32, height:32, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"0.9rem", boxShadow: "0 4px 10px rgba(0,0,0,0.1)" }}>✎</button>
+                <button onClick={doDelete} style={{ background:"#D0161B", color:"#fff", border:"none", borderRadius:"0.4rem", width:32, height:32, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"0.9rem", boxShadow: "0 4px 10px rgba(208,22,27,0.3)" }}>✕</button>
               </div>
             )}
 
             {/* Price badge */}
             <div style={{
-              position:"absolute", bottom:10, right:10,
-              background:"rgba(255,247,237,0.95)", backdropFilter:"blur(6px)",
-              border:"1px solid rgba(249,115,22,0.4)", borderRadius:"0.4rem",
-              padding:"0.2rem 0.6rem",
+              position:"absolute", bottom:15, right:15,
+              background:"#fff",
+              borderRadius:"0.5rem",
+              padding:"0.3rem 0.8rem",
+              boxShadow: "0 8px 20px rgba(0,0,0,0.1)",
+              transform: hovered ? "translateY(-5px)" : "none",
+              transition: "transform 0.3s ease"
             }}>
-              <span style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:"1.3rem", color:"#D0161B", lineHeight:1 }}>
+              <span style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:"1.5rem", color:"#D0161B", lineHeight:1 }}>
                 ₹{lowestPrice}
               </span>
             </div>
           </div>
 
-          {/* Text */}
-          <div style={{ padding:"0.8rem 1rem 0.9rem", flex:1, display:"flex", flexDirection:"column", justifyContent:"space-between" }}>
+          {/* Text Content */}
+          <div style={{ padding:"1.2rem 1.4rem", flex:1, display:"flex", flexDirection:"column", justifyContent:"space-between" }}>
             <div>
-              <h3 style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:"1.2rem", letterSpacing:"0.05em", color:"#1c0a00", lineHeight:1.15, marginBottom:"0.25rem" }}>
+              <h3 style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:"1.4rem", letterSpacing:"0.04em", color:"#111", lineHeight:1, marginBottom:"0.5rem" }}>
                 {item.name.toUpperCase()}
               </h3>
-              <p style={{ fontFamily:"'Barlow',sans-serif", fontSize:"0.72rem", color:"#92400e", lineHeight:1.5 }}>
+              <p style={{ fontFamily:"'Barlow',sans-serif", fontSize:"0.78rem", color:"#666", lineHeight:1.6, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
                 {item.description}
               </p>
             </div>
 
             <button onClick={doAdd} style={{
-              marginTop:"0.75rem", width:"100%",
-              background: flash ? "#16a34a" : "#F97316",
-              color:"#fff", border:"none", borderRadius:"0.35rem",
-              padding:"0.6rem 1rem",
+              marginTop:"1rem", width:"100%",
+              background: flash ? "#16a34a" : "#111",
+              color:"#fff", border:"none", borderRadius:"0.5rem",
+              padding:"0.8rem 1rem",
               fontFamily:"'Barlow',sans-serif", fontWeight:800,
-              fontSize:"0.75rem", letterSpacing:"0.08em", textTransform:"uppercase",
-              cursor:"pointer", transition:"background 0.25s, transform 0.15s",
-              boxShadow: flash ? "0 4px 14px rgba(22,163,74,0.35)" : "0 4px 14px rgba(249,115,22,0.35)",
-              transform: flash ? "scale(0.97)" : "scale(1)",
+              fontSize:"0.8rem", letterSpacing:"0.1em", textTransform:"uppercase",
+              cursor:"pointer", transition:"all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+              boxShadow: flash ? "0 10px 25px rgba(22,163,74,0.4)" : "0 10px 25px rgba(0,0,0,0.2)",
+              transform: hovered ? "translateY(-2px)" : "none",
             }}>
-              {flash ? "✓ Added to Cart!" : `+ Add  ₹${item.variants[selectedVar]?.price}`}
+              {flash ? "✓ Added!" : `Add to Cart — ₹${item.variants[selectedVar]?.price}`}
             </button>
           </div>
         </div>
@@ -171,67 +182,70 @@ function MenuCard({ item, onAddToCart, user, onEdit, onDelete }) {
         <div style={{
           position:"absolute", inset:0, backfaceVisibility:"hidden",
           transform:"rotateY(180deg)",
-          background:"#FFF7ED",
-          borderRadius:"1rem",
-          border:"1.5px solid #F97316",
-          boxShadow:"0 16px 40px rgba(249,115,22,0.2)",
+          background:"#fff",
+          borderRadius:"1.2rem",
+          border:"1px solid #D0161B",
+          boxShadow:"0 30px 70px rgba(208,22,27,0.2)",
           display:"flex", flexDirection:"column",
           overflow:"hidden",
         }}>
-          {/* Blurred photo bg */}
-          <img src={imgSrc} alt="" style={{
-            position:"absolute", inset:0, width:"100%", height:"100%",
-            objectFit:"cover", filter:"blur(20px) brightness(0.15) saturate(0.8)", transform:"scale(1.1)",
-            zIndex:0,
-          }} />
-          <div style={{ position:"absolute", inset:0, background:"rgba(255,247,237,0.92)", zIndex:1 }} />
+          {/* Subtle bg detail */}
+          <div style={{ position:"absolute", top:-50, right:-50, width:150, height:150, background:"rgba(208,22,27,0.03)", borderRadius:"50%" }} />
 
-          <div style={{ position:"relative", zIndex:2, padding:"1.2rem 1.2rem 0", flex:1 }}>
-            <h3 style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:"1.1rem", letterSpacing:"0.08em", color:"#D0161B", marginBottom:"0.8rem" }}>
+          <div style={{ position:"relative", zIndex:2, padding:"1.5rem 1.5rem 0", flex:1 }}>
+            <div style={{ fontSize:"0.6rem", fontWeight:900, color:"#D0161B", textTransform:"uppercase", letterSpacing:"0.2em", marginBottom:"0.4rem" }}>Select Variation</div>
+            <h3 style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:"1.3rem", letterSpacing:"0.06em", color:"#111", marginBottom:"1.2rem" }}>
               {item.name.toUpperCase()}
             </h3>
-            <div style={{ display:"flex", flexDirection:"column", gap:"0.5rem" }}>
+            
+            <div style={{ display:"flex", flexDirection:"column", gap:"0.6rem" }}>
               {item.variants?.map((v, i) => (
                 <div key={i} onClick={e => { e.stopPropagation(); setSelectedVar(i); }} style={{
                   display:"flex", justifyContent:"space-between", alignItems:"center",
-                  padding:"0.5rem 0.8rem",
-                  background: selectedVar === i ? "rgba(249,115,22,0.15)" : "#fff",
-                  borderRadius:"0.45rem",
-                  border:`1.5px solid ${selectedVar === i ? "#F97316" : "rgba(249,115,22,0.2)"}`,
-                  cursor:"pointer", transition:"all 0.2s",
+                  padding:"0.7rem 1rem",
+                  background: selectedVar === i ? "rgba(208,22,27,0.04)" : "transparent",
+                  borderRadius:"0.6rem",
+                  border:`1px solid ${selectedVar === i ? "#D0161B" : "rgba(0,0,0,0.08)"}`,
+                  cursor:"pointer", transition:"all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
                 }}>
                   <div>
-                    <div style={{ fontWeight:700, fontSize:"0.8rem", color:"#1c0a00", fontFamily:"'Barlow',sans-serif" }}>
-                      {v.label} {selectedVar === i && <span style={{ color:"#F97316" }}>✓</span>}
+                    <div style={{ fontWeight:800, fontSize:"0.85rem", color:"#111", fontFamily:"'Barlow',sans-serif" }}>
+                      {v.label}
                     </div>
-                    {v.includes && <div style={{ fontSize:"0.62rem", color:"#92400e", marginTop:"0.1rem" }}>{v.includes}</div>}
+                    {v.includes && <div style={{ fontSize:"0.65rem", color:"#888", marginTop:"0.1rem" }}>{v.includes}</div>}
                   </div>
-                  <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:"1.25rem", color:"#D0161B" }}>₹{v.price}</div>
+                  <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:"1.4rem", color: selectedVar === i ? "#D0161B" : "#444" }}>₹{v.price}</div>
                 </div>
               ))}
             </div>
           </div>
 
-          <div style={{ position:"relative", zIndex:2, padding:"0.8rem 1.2rem 1.2rem", display:"flex", gap:"0.6rem" }}>
+          <div style={{ position:"relative", zIndex:2, padding:"1.2rem 1.5rem 1.5rem", display:"flex", gap:"0.8rem" }}>
             <button onClick={e => { e.stopPropagation(); doAdd(e); }} style={{
-              flex:1, background: flash ? "#16a34a" : "#D0161B",
-              color:"#fff", border:"none", borderRadius:"0.4rem", padding:"0.65rem",
-              fontFamily:"'Barlow',sans-serif", fontWeight:800, fontSize:"0.72rem",
-              letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer",
-              transition:"background 0.25s",
-              boxShadow:"0 4px 14px rgba(208,22,27,0.3)",
+              flex:2, background: flash ? "#16a34a" : "#D0161B",
+              color:"#fff", border:"none", borderRadius:"0.5rem", padding:"0.85rem",
+              fontFamily:"'Barlow',sans-serif", fontWeight:800, fontSize:"0.78rem",
+              letterSpacing:"0.12em", textTransform:"uppercase", cursor:"pointer",
+              transition:"all 0.3s",
+              boxShadow:"0 10px 25px rgba(208,22,27,0.3)",
             }}>
-              {flash ? "✓ Added!" : `+ Add  ₹${item.variants[selectedVar]?.price}`}
+              {flash ? "✓ Success" : `Confirm Add`}
             </button>
             <button onClick={e => { e.stopPropagation(); setFlipped(false); }} style={{
-              background:"#fff", border:"1.5px solid rgba(249,115,22,0.3)",
-              color:"#92400e", borderRadius:"0.4rem", padding:"0.65rem 0.9rem",
-              fontFamily:"'Barlow',sans-serif", fontWeight:700, fontSize:"0.72rem",
-              cursor:"pointer",
-            }}>← Back</button>
+              flex:1, background:"#f5f5f5", border:"none",
+              color:"#444", borderRadius:"0.5rem", padding:"0.85rem",
+              fontFamily:"'Barlow',sans-serif", fontWeight:800, fontSize:"0.72rem",
+              cursor:"pointer", textTransform:"uppercase"
+            }}>Close</button>
           </div>
         </div>
 
+        <style>{`
+          @keyframes cardReveal {
+            from { opacity: 0; transform: translateY(30px) scale(0.9); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+          }
+        `}</style>
       </div>
     </div>
   );
