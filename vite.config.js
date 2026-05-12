@@ -24,8 +24,8 @@ export default defineConfig({
     chunkSizeWarningLimit: 500,
     minify: 'terser',
     terserOptions: {
-      compress: { drop_console: true, pure_funcs: ['console.log'] },
-      output: { comments: false }
+      compress: { drop_console: true },
+      format: { comments: false }
     },
     cssCodeSplit: true,
     assetsInlineLimit: 8192
